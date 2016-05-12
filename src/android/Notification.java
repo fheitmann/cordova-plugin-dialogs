@@ -474,12 +474,13 @@ public class Notification extends CordovaPlugin {
     
     @SuppressLint("NewApi")
     private AlertDialog.Builder createDialog(CordovaInterface cordova) {
+        /*
         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
         if (currentapiVersion >= android.os.Build.VERSION_CODES.HONEYCOMB) {
             return new AlertDialog.Builder(cordova.getActivity(), AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-        } else {
+        } else {*/
             return new AlertDialog.Builder(cordova.getActivity());
-        }
+        /*}*/
     }
 
     @SuppressLint("InlinedApi")
