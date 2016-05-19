@@ -37,7 +37,7 @@ module.exports = {
      * @param {String} buttonLabel          Label of the close button (default: OK)
      */
     alert: function(message, completeCallback, title, buttonLabel) {
-        var _title = (typeof title === "string" ? title : "Alert");
+        var _title = (title || "Alert");
         var _buttonLabel = (buttonLabel || "OK");
         exec(completeCallback, null, "Notification", "alert", [message, _title, _buttonLabel]);
     },
@@ -52,7 +52,7 @@ module.exports = {
      * @param {Array} buttonLabels          Array of the labels of the buttons (default: ['OK', 'Cancel'])
      */
     confirm: function(message, resultCallback, title, buttonLabels) {
-        var _title = (typeof title === "string" ? title : "Confirm");
+        var _title = (title || "Confirm");
         var _buttonLabels = (buttonLabels || ["OK", "Cancel"]);
 
         // Strings are deprecated!
@@ -60,10 +60,24 @@ module.exports = {
             console.log("Notification.confirm(string, function, string, string) is deprecated.  Use Notification.confirm(string, function, string, array).");
         }
 
-        _buttonLabels = convertButtonLabels(_buttonLabels);
+        // Some platforms take an array of button label names.
+        // Other platforms take a comma separated list.
+        // For compatibility, we convert to the desired type based on the platform.
+        if (platform.id == "amazon-fireos" || platform.id == "android" || platform.id == "ios" || platform.id == "windowsphone" || platform.id == "firefoxos" || platform.id == "ubuntu") {
 
+            if (typeof _buttonLabels === 'string') {
+                var buttonLabelString = _buttonLabels;
+                _buttonLabels = _buttonLabels.split(","); // not crazy about changing the var type here
+            }
+        } else {
+            if (Array.isArray(_buttonLabels)) {
+                var buttonLabelArray = _buttonLabels;
+                _buttonLabels = buttonLabelArray.toString();
+            }
+        }
         exec(resultCallback, null, "Notification", "confirm", [message, _title, _buttonLabels]);
     },
+
 
     /**
      * Open a native prompt dialog, with a customizable title and button text.
@@ -76,21 +90,15 @@ module.exports = {
      * @param {String} title                Title of the dialog (default: "Prompt")
      * @param {Array} buttonLabels          Array of strings for the button labels (default: ["OK","Cancel"])
      * @param {String} defaultText          Textbox input value (default: empty string)
+		* @param {String} inputSyle         Textbox input type: 1:text, 2:numeric + 3:Obscured/Password (default: 1)
      */
-    prompt: function(message, resultCallback, title, buttonLabels, defaultText) {
-        var _message = (typeof message === "string" ? message : "Prompt message");
-        var _title = (typeof title === "string" ? title : "Prompt");
+    prompt: function(message, resultCallback, title, buttonLabels, defaultText, inputSyle) {
+        var _message = (message || "Prompt message");
+        var _title = (title || "Prompt");
         var _buttonLabels = (buttonLabels || ["OK","Cancel"]);
-
-        // Strings are deprecated!
-        if (typeof _buttonLabels === 'string') {
-            console.log("Notification.prompt(string, function, string, string) is deprecated.  Use Notification.confirm(string, function, string, array).");
-        }
-
-        _buttonLabels = convertButtonLabels(_buttonLabels);
-
         var _defaultText = (defaultText || "");
-        exec(resultCallback, null, "Notification", "prompt", [_message, _title, _buttonLabels, _defaultText]);
+		var _inputSyle = (inputSyle || 1)
+        exec(resultCallback, null, "Notification", "prompt", [_message, _title, _buttonLabels, _defaultText, _inputSyle]);
     },
 
     /**
@@ -104,25 +112,3 @@ module.exports = {
         exec(null, null, "Notification", "beep", [ defaultedCount ]);
     }
 };
-
-function convertButtonLabels(buttonLabels) {
-
-    // Some platforms take an array of button label names.
-    // Other platforms take a comma separated list.
-    // For compatibility, we convert to the desired type based on the platform.
-    if (platform.id == "amazon-fireos" || platform.id == "android" || platform.id == "ios" ||
-        platform.id == "windowsphone" || platform.id == "firefoxos" || platform.id == "ubuntu" ||
-        platform.id == "windows8" || platform.id == "windows") {
-
-        if (typeof buttonLabels === 'string') {
-            buttonLabels = buttonLabels.split(","); // not crazy about changing the var type here
-        }
-    } else {
-        if (Array.isArray(buttonLabels)) {
-            var buttonLabelArray = buttonLabels;
-            buttonLabels = buttonLabelArray.toString();
-        }
-    }
-
-    return buttonLabels;
-}
