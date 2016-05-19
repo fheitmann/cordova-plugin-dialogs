@@ -323,7 +323,7 @@ public class Notification extends CordovaPlugin {
 
 				AlertDialog.Builder dlg = new AlertDialog.Builder(
 						cordova.getActivity(),
-						AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+						AlertDialog.THEME_DEVICE_DEFAULT_DARK);
 				dlg.setMessage(message);
 				dlg.setTitle(title);
 				dlg.setCancelable(true);
